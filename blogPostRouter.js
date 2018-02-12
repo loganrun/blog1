@@ -1,20 +1,20 @@
-onst express = require('express');
+const express = require('express');
 const router = express.Router();
 
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 
-const BlogPosts = require('./models');
+const {BlogPosts} = require('./models');
 
-BlogPosts.create('Damn', "kjhsfkjsdfkjhksjahfkjshfkhsakhfkjhskkjfh", 'Kendrick', 'Feb 12, 2018');
-BlogPosts.create('Slam', "kjhsfkjsdfkjhksjahfkjshfkhsakhfkjhskkjfh", 'Kendrick', 'Feb 12, 2018');
-BlogPosts.create('Bam', "kjhsfkjsdfkjhksjahfkjshfkhsakhfkjhskkjfh", 'Kendrick', 'Feb 12, 2018');
+BlogPosts.create('Damn', "kjhsfkjsdfkjhksjahfkjshfkhsakhfkjhskkjfh", 'Kendrick');
+BlogPosts.create('Slam', "kjhsfkjsdfkjhksjahfkjshfkhsakhfkjhskkjfh", 'Kendrick');
+BlogPosts.create('Bam', "kjhsfkjsdfkjhksjahfkjshfkhsakhfkjhskkjfh", 'Kendrick');
 
-router.get('/blog-posts', (req, res)=>{
-  res.json(BlogPosts.get);
+router.get('/', (req, res)=>{
+  res.json(BlogPosts.get());
 })
 
-router.post('/blog-posts', jsonParser, (req, res) => {
+router.post('/', jsonParser, (req, res) => {
   const requiredFields = ['title', 'content', 'author', 'publishDate'];
   for (let i=0; i<requiredFields.length; i++) {
     const field = requiredFields[i];
@@ -28,13 +28,13 @@ router.post('/blog-posts', jsonParser, (req, res) => {
   res.status(201).json(item);
 });
 
-router.delete('blog-posts/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
   BlogPosts.delete(req.params.id);
   console.log(`Deleted blog post \`${req.params.ID}\``);
   res.status(204).end();
 });
 
-router.put('blog-posts/:id', jsonParser, (req, res) => {
+router.put('/:id', jsonParser, (req, res) => {
   const requiredFields = ['title', 'content', 'author', 'publishDate'];
   for (let i=0; i<requiredFields.length; i++) {
     const field = requiredFields[i];
@@ -44,6 +44,7 @@ router.put('blog-posts/:id', jsonParser, (req, res) => {
       return res.status(400).send(message);
     }
   }
+
   if (req.params.id !== req.body.id) {
     const message = (
       `Request path id (${req.params.id}) and request body id `
@@ -58,8 +59,8 @@ router.put('blog-posts/:id', jsonParser, (req, res) => {
     content: req.body.content,
     author: req.body.author,
     publishDate: req.body.publishDate
-  );
+  });
   res.status(204).end();
-})
+});
 
 module.exports = router;
