@@ -1,0 +1,27 @@
+{
+  "name": "blog1",
+  "version": "1.0.0",
+  "description": "blog",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --exit",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loganrun/blog1.git"
+  },
+  "author": "\"mit\"",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/loganrun/blog1/issues"
+  },
+  "homepage": "https://github.com/loganrun/blog1#readme",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.0.1"
+  }
+}
