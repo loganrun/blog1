@@ -4,11 +4,11 @@ const mongoose = require('mongoose');
 const morgan= require('morgan');
 const bodyParser = require('body-parser');
 mongoose.Promise = global.Promise;
-const {PORT, DATABASE_URL} = require('./config.js');
+const {PORT,IP, DATABASE_URL} = require('./config.js');
 const app = express();
-app.use(bodyParser.json);
+app.use(bodyParser.json());
 app.use(morgan('common'));
-const BlogPosts = require('./models.js');
+const {BlogPosts} = require('./models.js');
 
 // const blogPostRouter = require('./blogPostRouter');
 
@@ -19,12 +19,13 @@ const BlogPosts = require('./models.js');
 
 app.get('/posts', (req, res) => {
   // res.sendFile(__dirname + '/views/index.html');
+  console.log("get request");
   BlogPosts
   .find()
   .limit(10)
   .then(posts => {
     res.json({
-      post: posts.map(
+      posts: posts.map(
         (post) => post.serialize())
     });
   })
@@ -63,7 +64,7 @@ app.post('/posts', (req, res) => {
       author: req.body.author,
       content: req.body.content,
     })
-    .then(blog => res.status(201).json(blog.serialize()))
+    .then(post => res.status(201).json(post.serialize()))
     .catch(err => {
       console.error(err);
       res.status(500).json({ message: 'Internal server error' });
@@ -108,14 +109,14 @@ app.use('*', function (req, res) {
 let server;
 
 function runServer(databaseUrl, port = PORT) {
-
+console.log("server call", databaseUrl);
   return new Promise((resolve, reject) => {
     mongoose.connect(databaseUrl, err => {
       if (err) {
         return reject(err);
       }
-      server = app.listen(port,() => {
-        console.log(`Your app is listening `);
+      server = app.listen(port,IP, () => {
+        console.log(`Your app is listening ${port} ${IP}`);
         resolve();
       })
         .on('error', err => {

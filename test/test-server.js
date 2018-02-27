@@ -1,22 +1,65 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const {app, runServer, closeServer} = require('../server');
+const { TEST_DATABASE_URL} = require('../config');
+const faker = require('faker');
 const expect = chai.expect;
+const {BlogPosts} = require('../models');
+const mongoose = require('mongoose');
 chai.use(chaiHttp);
 
-describe('blog-posts', function(){
+function seedBlogData() {
+  console.info('seeding blog data');
+  const seedData = [];
+
+  for (let i=1; i<=10; i++) {
+    seedData.push(generateBlogData());
+  }
+  return BlogPosts.insertMany(seedData);
+}
+
+function generateTitleName() {
+  const title= ['Flam', 'Dam', 'Blam', 'Jam', 'Ham'];
+  return title[Math.floor(Math.random() * title.length)];
+}
+
+function generateBlogData() {
+  return {
+    author: faker.name.findName(),
+    content: faker.lorem.sentences(),
+    title:  generateTitleName(),
+    date: faker.date.past(1)
+  };
+}
+
+function tearDownDb() {
+  console.warn('Deleting database');
+  return mongoose.connection.dropDatabase();
+}
+
+
+describe('posts', function(){
     
-    before(function(){
-        return runServer();
-    });
-    
-    after(function(){
-        return closeServer();
-    });
+  before(function(){
+        return runServer(TEST_DATABASE_URL);
+  });
+
+  beforeEach(function() {
+    return seedBlogData();
+  });
+
+  afterEach(function() {
+    return tearDownDb();
+  });
+  
+  after(function() {
+    return closeServer();
+  });
+
     
     it('should return blog post on GET', function(){
         return chai.request(app)
-        .get('/blog-posts')
+        .get('/posts')
         .then(function(res){
             expect(res).to.have.status(200);
             expect(res).to.be.json;
@@ -35,7 +78,7 @@ describe('blog-posts', function(){
         const newPost = { title: 'the true Black Panther', content: 'jfsdbsfdskdjfjkhdskjfhjsdhfkjhskdjfhkjsdfhkj', 
         author: 'Roberto',publishDate:  "Feb 18, 2018"};
        return chai.request(app)
-       .post('/blog-posts')
+       .post('/posts')
        .send(newPost)
        .then(function(res){
           expect(res).to.have.status(201);
@@ -50,11 +93,11 @@ describe('blog-posts', function(){
     it('should update blog posts on PUT', function() {
       const updateData = {title: 'Is Killmonger right?', content: 'maybe', author: 'Roboto', publishDate: 'Feb 18, 2018'};
       return chai.request(app)
-      .get('/blog-posts')
+      .get('/posts')
       .then(function(res){
           updateData.id = res.body[0].id;
           return chai.request(app)
-          .put(`/blog-posts/${updateData.id}`)
+          .put(`/posts/${updateData.id}`)
           .send(updateData);
       })
        
@@ -66,10 +109,10 @@ describe('blog-posts', function(){
     
     it('should delete blog post on DELETE', function(){
        return chai.request(app)
-       .get('/blog-posts')
+       .get('/posts')
        .then(function(res){
            return chai.request(app)
-          .delete(`/blog-posts/${res.body[0].id}`); 
+          .delete(`/posts/${res.body[0].id}`); 
        })
        
        .then(function(res){
